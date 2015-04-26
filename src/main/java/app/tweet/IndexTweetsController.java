@@ -13,6 +13,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,10 +30,13 @@ public class IndexTweetsController {
     TweetIndexer tweetIndexer;
 
     @RequestMapping("/index-tweets")
-    public String indexTweets() {
-        clearIndex();
+    public String indexTweets(
+            @RequestParam(value = "clear", defaultValue = "false", required = false) boolean clearIndex) {
+        if (clearIndex) {
+            clearIndex();
+        }
 
-        Pageable pageable = new PageRequest(0, 10000);
+        Pageable pageable = new PageRequest(0, 1000);
         while (pageable != null) {
             Page<Tweet> tweets = tweetJpaRepository.findAll(pageable);
 
@@ -40,7 +44,8 @@ public class IndexTweetsController {
 
             tweets.forEach((tweet) -> {
                 TweetDocument tweetDocument = tweetIndexer.createTweetDocument(tweet);
-                indexQueries.add(new IndexQueryBuilder().withObject(tweetDocument).build());
+                indexQueries.add(new IndexQueryBuilder().withObject(tweetDocument)
+                        .withId(tweetDocument.getId().toString()).build());
             });
 
             elasticsearchOperations.bulkIndex(indexQueries);
