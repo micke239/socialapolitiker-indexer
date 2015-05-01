@@ -1,7 +1,9 @@
 package app.tweet;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.persistence.EntityManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,9 @@ public class IndexTweetsController {
     @Autowired
     TweetIndexer tweetIndexer;
 
+    @Autowired
+    EntityManager entityManager;
+
     @RequestMapping("/index-tweets")
     public String indexTweets(
             @RequestParam(value = "clear", defaultValue = "false", required = false) boolean clearIndex) {
@@ -40,19 +45,23 @@ public class IndexTweetsController {
         while (pageable != null) {
             Page<Tweet> tweets = tweetJpaRepository.findAll(pageable);
 
-            List<IndexQuery> indexQueries = new ArrayList<>();
-
-            tweets.forEach((tweet) -> {
-                TweetDocument tweetDocument = tweetIndexer.createTweetDocument(tweet);
-                indexQueries.add(new IndexQueryBuilder().withObject(tweetDocument)
-                        .withId(tweetDocument.getId().toString()).build());
-            });
+            List<IndexQuery> indexQueries = tweets
+                    .getContent()
+                    .stream()
+                    .map((tweet) -> {
+                        TweetDocument tweetDocument = tweetIndexer.createTweetDocument(tweet);
+                        return new IndexQueryBuilder().withObject(tweetDocument)
+                                .withId(tweetDocument.getId().toString()).build();
+                    }).collect(Collectors.toList());
 
             elasticsearchOperations.bulkIndex(indexQueries);
 
             log.info("Done page " + tweets.getNumber() + " of " + tweets.getTotalPages());
 
             pageable = tweets.nextPageable();
+
+            // necessary for some reason :( i give up
+            entityManager.clear();
         }
 
         return "DONE!";
