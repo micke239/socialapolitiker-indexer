@@ -50,7 +50,8 @@ public class TweetIndexerImpl implements TweetIndexer {
     }
 
     private List<String> splitWords(String text) {
-        String string = text.replaceAll("[^A-ZÅÄÖa-zåäö\\s#@]+", "").replaceAll("\\s+", " ");
+        String string = text.toLowerCase();
+        string = string.replaceAll("[^a-zåäö\\s#@]+", "").replaceAll("\\s+", " ");
         List<String> list = new ArrayList<String>(Arrays.asList(string.split(" ")));
         list.removeAll(IGNORED_WORDS);
         return list;
