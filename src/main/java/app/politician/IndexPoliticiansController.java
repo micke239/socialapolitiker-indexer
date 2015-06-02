@@ -1,4 +1,4 @@
-package app.tweet;
+package app.politician;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,26 +18,24 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import app.tweet.domain.Tweet;
-
 @RestController
-public class IndexTweetsController {
+public class IndexPoliticiansController {
     Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired
     ElasticsearchOperations elasticsearchOperations;
 
     @Autowired
-    TweetJpaRepository tweetJpaRepository;
+    PoliticianJpaRepository politicianJpaRepository;
 
     @Autowired
-    TweetIndexer tweetIndexer;
+    PoliticianIndexer politicianIndexer;
 
     @Autowired
     EntityManager entityManager;
 
-    @RequestMapping("/index-tweets")
-    public String indexTweets(
+    @RequestMapping("/index-politicians")
+    public String indexPoliticians(
             @RequestParam(value = "clear", defaultValue = "false", required = false) boolean clearIndex) {
         if (clearIndex) {
             clearIndex();
@@ -45,18 +43,19 @@ public class IndexTweetsController {
 
         Pageable pageable = new PageRequest(0, 1000);
         while (pageable != null) {
-            Page<Tweet> tweets = tweetJpaRepository.findTweetsFromActivePoliticians(pageable);
+            Page<Politician> politicians = politicianJpaRepository.findActivePoliticians(pageable);
 
-            List<IndexQuery> indexQueries = tweets
+            List<IndexQuery> indexQueries = politicians
                     .getContent()
                     .stream()
-                    .map((tweet) -> {
+                    .map((politician) -> {
                         try {
-                            TweetDocument tweetDocument = tweetIndexer.createTweetDocument(tweet);
-                            return new IndexQueryBuilder().withObject(tweetDocument)
-                                    .withId(tweetDocument.getId().toString()).build();
+                            PoliticianDocument politicianDocument = politicianIndexer
+                                    .createPoliticianDocument(politician);
+                            return new IndexQueryBuilder().withObject(politicianDocument)
+                                    .withId(politicianDocument.getId().toString()).build();
                         } catch (Exception e) {
-                            log.error("Uncaught exception caught while indexing tweet " + tweet.getId(), e);
+                            log.error("Uncaught exception caught while indexing tweet " + politician.getId(), e);
                         }
 
                         return null;
@@ -64,9 +63,9 @@ public class IndexTweetsController {
 
             elasticsearchOperations.bulkIndex(indexQueries);
 
-            log.info("Done page " + tweets.getNumber() + " of " + tweets.getTotalPages());
+            log.info("Done page " + politicians.getNumber() + " of " + politicians.getTotalPages());
 
-            pageable = tweets.nextPageable();
+            pageable = politicians.nextPageable();
 
             // necessary for some reason :( i give up
             entityManager.clear();
@@ -76,9 +75,8 @@ public class IndexTweetsController {
     }
 
     private void clearIndex() {
-        if (elasticsearchOperations.indexExists(TweetDocument.class)) {
-            elasticsearchOperations.deleteIndex(TweetDocument.class);
+        if (elasticsearchOperations.indexExists(PoliticianDocument.class)) {
+            elasticsearchOperations.deleteIndex(PoliticianDocument.class);
         }
     }
-
 }

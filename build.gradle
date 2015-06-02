@@ -30,6 +30,9 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
     compile("org.springframework.boot:spring-boot-starter-data-elasticsearch")
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
+    compile("com.twitter:twitter-text:1.12.1")
+    compile('org.apache.commons:commons-lang3:3.4')
+    
     compile 'mysql:mysql-connector-java:5.1.31'
     
     testCompile("org.springframework.boot:spring-boot-starter-test")

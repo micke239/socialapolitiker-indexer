@@ -2,6 +2,7 @@ package app.tweet;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -21,6 +22,9 @@ public class TweetDocument {
     private String politicianTwitterScreenName;
     private String partyString;
     private String partyUrlName;
+    private @Field(type = FieldType.String, index = FieldIndex.not_analyzed) Set<String> hashtags;
+    private @Field(type = FieldType.String, index = FieldIndex.not_analyzed) Set<String> urls;
+    private @Field(type = FieldType.String, index = FieldIndex.not_analyzed) Set<String> userMentions;
 
     public Long getId() {
         return id;
@@ -96,6 +100,30 @@ public class TweetDocument {
 
     public void setPartyString(String partyString) {
         this.partyString = partyString;
+    }
+
+    public void setHashtags(Set<String> hashtags) {
+        this.hashtags = hashtags;
+    }
+
+    public void setUrls(Set<String> urls) {
+        this.urls = urls;
+    }
+
+    public void setUserMentions(Set<String> userMentions) {
+        this.userMentions = userMentions;
+    }
+
+    public Set<String> getHashtags() {
+        return hashtags;
+    }
+
+    public Set<String> getUrls() {
+        return urls;
+    }
+
+    public Set<String> getUserMentions() {
+        return userMentions;
     }
 
 }

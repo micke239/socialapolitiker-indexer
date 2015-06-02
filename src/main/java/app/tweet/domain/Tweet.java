@@ -1,12 +1,15 @@
-package app.tweet;
+package app.tweet.domain;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import app.politician.Politician;
@@ -23,6 +26,8 @@ public class Tweet {
     private String language;
     private String source;
     private Long retweet;
+
+    private List<TweetUrl> urls;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -98,4 +103,14 @@ public class Tweet {
     public void setRetweet(Long retweet) {
         this.retweet = retweet;
     }
+
+    @OneToMany(mappedBy = "tweet", fetch = FetchType.EAGER)
+    public List<TweetUrl> getUrls() {
+        return urls;
+    }
+
+    public void setUrls(List<TweetUrl> urls) {
+        this.urls = urls;
+    }
+
 }

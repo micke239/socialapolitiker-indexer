@@ -1,15 +1,18 @@
 package app.politician;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import app.party.Party;
+import app.tweet.domain.Tweet;
 
 @Entity
 @Table(name = "politician")
@@ -22,8 +25,11 @@ public class Politician {
     private Date createdAt;
     private Date updatedAt;
     private Date lastImport;
+    private Date forceDisabledAt;
     private String description;
     private String profileImageUrl;
+
+    private List<Tweet> tweets;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -106,6 +112,23 @@ public class Politician {
 
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public Date getForceDisabledAt() {
+        return forceDisabledAt;
+    }
+
+    public void setForceDisabledAt(Date forceDisabledAt) {
+        this.forceDisabledAt = forceDisabledAt;
+    }
+
+    @OneToMany(mappedBy = "politician")
+    public List<Tweet> getTweets() {
+        return tweets;
+    }
+
+    public void setTweets(List<Tweet> tweets) {
+        this.tweets = tweets;
     }
 
 }
