@@ -15,6 +15,7 @@ import app.party.Party;
 import app.politician.Politician;
 import app.tweet.domain.Tweet;
 import app.tweet.domain.TweetUrl;
+import app.util.DomainParsingUtil;
 
 import com.twitter.Extractor;
 
@@ -69,7 +70,17 @@ public class TweetIndexerImpl implements TweetIndexer {
         text = handleUrls(tweet, tweetDocument, text);
         text = handleUserMentions(tweet, tweetDocument, text);
 
+        handleDomains(tweetDocument);
+
         tweetDocument.setTweetedWords(splitWords(text));
+    }
+
+    private void handleDomains(TweetDocument tweetDocument) {
+        Set<String> domains = tweetDocument.getUrls().stream().map(url -> {
+            return DomainParsingUtil.parseDomain(url);
+        }).collect(Collectors.toSet());
+
+        tweetDocument.setDomains(domains);
     }
 
     private String handleHashtags(Tweet tweet, TweetDocument tweetDocument, String text) {
@@ -113,8 +124,8 @@ public class TweetIndexerImpl implements TweetIndexer {
     private String handleUserMentions(Tweet tweet, TweetDocument tweetDocument, String text) {
         List<String> extractedMentions = extractor.extractMentionedScreennames(text);
 
-        Set<String> userMentions = extractedMentions.stream().map(hashtag -> {
-            return "@" + hashtag;
+        Set<String> userMentions = extractedMentions.stream().map(userMention -> {
+            return "@" + userMention;
         }).collect(Collectors.toSet());
 
         text = userMentions.stream().reduce(text, (string, userMention) -> {

@@ -25,6 +25,7 @@ public class TweetDocument {
     private @Field(type = FieldType.String, index = FieldIndex.not_analyzed) Set<String> hashtags;
     private @Field(type = FieldType.String, index = FieldIndex.not_analyzed) Set<String> urls;
     private @Field(type = FieldType.String, index = FieldIndex.not_analyzed) Set<String> userMentions;
+    private @Field(type = FieldType.String, index = FieldIndex.not_analyzed) Set<String> domains;
 
     public Long getId() {
         return id;
@@ -124,6 +125,14 @@ public class TweetDocument {
 
     public Set<String> getUserMentions() {
         return userMentions;
+    }
+
+    public void setDomains(Set<String> domains) {
+        this.domains = domains;
+    }
+
+    public Set<String> getDomains() {
+        return domains;
     }
 
 }
