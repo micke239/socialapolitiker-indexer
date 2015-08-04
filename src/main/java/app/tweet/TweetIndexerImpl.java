@@ -39,6 +39,8 @@ public class TweetIndexerImpl implements TweetIndexer {
             "vart", "vem", "vem ", "vi", "vid", "vid ", "vilka", "vilka ", "vilkas", "vilken", "vilket", "vår", "vår ",
             "våra", "vårt", "än", "är", "åt", "över", "@", "#svpol", "of", "a", "år", "via", "is", "and", "for", "on");
 
+    private static List<String> IGNORED_DOMAINS = Arrays.asList("t.co", "bit.ly", "ow.ly");
+
     @Autowired
     Extractor extractor;
 
@@ -78,6 +80,8 @@ public class TweetIndexerImpl implements TweetIndexer {
     private void handleDomains(TweetDocument tweetDocument) {
         Set<String> domains = tweetDocument.getUrls().stream().map(url -> {
             return DomainParsingUtil.parseDomain(url);
+        }).filter(domain -> {
+            return !IGNORED_DOMAINS.contains(domain);
         }).collect(Collectors.toSet());
 
         tweetDocument.setDomains(domains);

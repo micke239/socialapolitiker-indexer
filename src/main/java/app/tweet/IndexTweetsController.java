@@ -78,6 +78,9 @@ public class IndexTweetsController {
     private void clearIndex() {
         if (elasticsearchOperations.indexExists(TweetDocument.class)) {
             elasticsearchOperations.deleteIndex(TweetDocument.class);
+            elasticsearchOperations.createIndex(TweetDocument.class);
+            elasticsearchOperations.putMapping(TweetDocument.class);
+            elasticsearchOperations.refresh(TweetDocument.class, true);
         }
     }
 
